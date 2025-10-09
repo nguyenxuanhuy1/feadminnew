@@ -1,0 +1,130 @@
+.notfound {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: #f8f9fa;
+
+  &__title {
+    font-size: clamp(6rem, 18vw, 12rem);
+    font-weight: 900;
+    color: #ff4d4f;
+    margin: 0;
+    position: relative;
+    animation: wobble 2s infinite;
+
+    &::before,
+    &::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    &::before {
+      color: #00d8ff;
+      z-index: -1;
+      animation: glitchTop 2s infinite;
+    }
+
+    &::after {
+      color: #ff00c1;
+      z-index: -2;
+      animation: glitchBottom 2s infinite;
+    }
+  }
+
+  &__subtitle {
+    font-size: 1.25rem;
+    color: #555;
+    max-width: 24rem;
+    margin: 1rem 0 2rem;
+  }
+}
+
+/* Custom pill button */
+.btn-404 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.75rem;
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7a45 100%);
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  }
+}
+
+
+/* Animations */
+@keyframes wobble {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes glitchTop {
+  0% {
+    clip-path: polygon(0 2%, 100% 2%, 100% 8%, 0 8%);
+    transform: translate(-2px, -2px);
+  }
+  50% {
+    clip-path: polygon(0 60%, 100% 60%, 100% 68%, 0 68%);
+    transform: translate(2px, 2px);
+  }
+  100% {
+    clip-path: polygon(0 2%, 100% 2%, 100% 8%, 0 8%);
+    transform: translate(-2px, -2px);
+  }
+}
+
+@keyframes glitchBottom {
+  0% {
+    clip-path: polygon(0 80%, 100% 80%, 100% 88%, 0 88%);
+    transform: translate(2px, 2px);
+  }
+  50% {
+    clip-path: polygon(0 20%, 100% 20%, 100% 28%, 0 28%);
+    transform: translate(-2px, -2px);
+  }
+  100% {
+    clip-path: polygon(0 80%, 100% 80%, 100% 88%, 0 88%);
+    transform: translate(2px, 2px);
+  }
+}
+
+/* Dark-mode tweaks */
+@media (prefers-color-scheme: dark) {
+  .notfound {
+    background: #1a1a1a;
+  }
+  .notfound__title {
+    color: #ff7875;
+  }
+  .notfound__subtitle {
+    color: #aaa;
+  }
+}

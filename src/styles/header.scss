@@ -1,0 +1,54 @@
+@import "variables";
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  background-color: $textWhite;
+  color: #000;
+  .headerAdmin {
+    height: 100vh;
+    .h {
+      height: 64px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: $redTeca;
+    }
+
+    .header-wrapper {
+      background-image: url("../assets/trongdong.png");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      padding: 16px;
+      background-color: $redTeca;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      height: 64px;
+      z-index: 3;
+      overflow: hidden;
+      .text-white {
+        color: $textWhite;
+      }
+
+      &.collapsed {
+        width: calc(100vw - 80px);
+      }
+
+      &.expanded {
+        width: calc(100vw - 270px);
+      }
+      .right-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+    .content-layout {
+      margin-top: 4rem;
+    }
+  }
+}

@@ -1,0 +1,54 @@
+@import "variables";
+
+.ant-layout-sider-children {
+  background-color: $textWhite;
+}
+.ant-layout-sider-trigger {
+  background-color: $textWhite !important;
+  .anticon {
+    color: black;
+  }
+}
+.ant-modal-content {
+  padding: 0 !important;
+  border-radius: 0px;
+}
+.ant-modal-close {
+  top: 0 !important;
+  right: 0 !important;
+  position: absolute !important;
+  color: $textWhite !important;
+}
+
+.custom-menu .ant-menu-item .anticon,
+.custom-menu .ant-menu-submenu-title .anticon {
+  color: #a30000;
+}
+
+.custom-menu .ant-menu-item,
+.custom-menu .ant-menu-submenu-title {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.custom-menu .ant-menu-item-selected {
+  background: #a30000 !important;
+  border-radius: 6px;
+  color: $textWhite;
+}
+
+.custom-menu .ant-menu-item-selected .anticon {
+  color: $textWhite !important;
+}
+
+.custom-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: $redTeca !important;
+  border-color: $redTeca !important;
+}
+.custom-tree {
+  pointer-events: none !important;
+}
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: red !important;
+  border-color: red !important;
+}
