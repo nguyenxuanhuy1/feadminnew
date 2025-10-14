@@ -27,38 +27,19 @@ const SearchForm = (props: any) => {
       >
         {(propFormik: any) => {
           return (
-            <Form>
+            <Form className="form-search">
               <Row gutter={[8, 16]}>
-               
-                <Col span={8}>
-                  <Field
-                    component={Input}
-                    label="Tên bài viết"
-                    name="documentName"
-                    placeholder="Nhập thông tin trích yếu"
-                  />
+                <Col xs={24} md={8}>
+                  <Field component={Input} label="Tên bài viết" name="documentName" placeholder="Nhập thông tin trích yếu" />
                 </Col>
-                <Col span={8}>
-                  <Field
-                    component={Select}
-                    label="Mã bài viết"
-                    name="competentAuthorityCode"
-                    placeholder="Chọn cấp thẩm quyền"
-                    options={issLevel}
-                    allowClear
-                    showSearch
-                  />
+                <Col xs={24} md={8}>
+                  <Field component={Select} label="Mã bài viết" name="competentAuthorityCode" placeholder="Chọn cấp thẩm quyền" options={issLevel} allowClear showSearch />
                 </Col>
-               
-                <Col span={8}>
-                  <Field
-                    component={Input}
-                    label="url"
-                    name="content"
-                    placeholder="Nhập nội dung"
-                  />
+                <Col xs={24} md={8}>
+                  <Field component={Input} label="url" name="content" placeholder="Nhập nội dung" />
                 </Col>
               </Row>
+
             </Form>
           );
         }}

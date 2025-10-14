@@ -7,17 +7,15 @@ export const valueSearch = {
   content: "",
 };
 export const valueSubmit = {
-  docTypeCode: "",
-  sectorCode: "",
-  documentCode: "",
-  article: "",
-  clause: "",
-  point: "",
-  note: "",
-  code: "",
-  competentAuthorityCode: "",
+  title: "",
+  image: "",
+  categoryId: undefined,
+  views: 0,
+  isFeatured: false,
+  tags: [],
   content: "",
 };
+
 export const valueSearchImport = {
   docTypeCode: null,
   sectorCode: null,

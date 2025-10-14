@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -54,7 +54,7 @@ axiosInstance.interceptors.response.use(
         }
         localStorage.removeItem("token");
         localStorage.removeItem("refresh-token");
-        window.location.href = "/login";
+        // window.location.href = "/login";
         break;
       case 403:
         message.error("You don't have permission to access this resource.");

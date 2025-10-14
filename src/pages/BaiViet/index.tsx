@@ -37,8 +37,10 @@ const BaiViet = () => {
       if (result.status === 200) {
         setDataSearch({
           data: result.data.data,
-          total: result.data.meta.total,
+          total: result.data.total,
         });
+        console.log(result.data.data);
+        
         if (result.data.msg !== null) {
           notification.success({
             message: result.data.msg,
@@ -70,7 +72,7 @@ const BaiViet = () => {
   }, [searchForm, paramsPage, refresh]);
 
   return (
-      <WrapSection>
+    <WrapSection>
       <SearchForm
         setSearchForm={setSearchForm}
         categoryCode={categoryCode}
@@ -88,7 +90,7 @@ const BaiViet = () => {
         typeDoc={typeDoc}
         handleExport={handleExport}
       />
-      </WrapSection>
+    </WrapSection>
   );
 };
 

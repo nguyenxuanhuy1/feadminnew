@@ -7,26 +7,26 @@ export const searchThamQuyen = async (
   page: number,
   size: number
 ) => {
-  const res = await axiosInstance.post(
-    `/api/cms/competent/search?page=${page - 1}&size=${size}`,
+  const res = await axiosInstance.get(
+    `/api/articles/search?${page}&size=${size}`,
     body
   );
   return res;
 };
 export const createThamQuyen = async (body: any) => {
-  const res = await axiosInstance.post(`/api/cms/competent/create`, body);
+  const res = await axiosInstance.post(`/api/articles/create`, body);
   return res;
 };
 export const updateThamQuyen = async (id: string, body: any) => {
-  const res = await axiosInstance.post(`/api/cms/competent/update/${id}`, body);
+  const res = await axiosInstance.post(`/api/articles/update/${id}`, body);
   return res;
 };
 export const daleteThamQuyen = async (id: string) => {
-  const res = await axiosInstance.post(`/api/cms/competent/delete/${id}`, id);
+  const res = await axiosInstance.post(`/api/articles/delete/${id}`, id);
   return res;
 };
 export const detailThamQuyen = async (id: string) => {
-  const res = await axiosInstance.post(`/api/cms/competent/detail/${id}`, id);
+  const res = await axiosInstance.get(`/api/articles/detail/${id}`);
   return res;
 };
 export const exportThamQuyen = async (body: any) => {

@@ -9,7 +9,7 @@ import {
   EyeOutlined,
   FileExcelOutlined,
 } from "@ant-design/icons";
-import { Col, notification, Row } from "antd";
+import { Col, notification, Row, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Field, Form, Formik } from "formik";
 import React, { useMemo, useRef } from "react";
@@ -27,7 +27,7 @@ import { ButtonHTMLTypes } from "@/interfaces";
 import { ITableFormProps } from "../helper/interface";
 import { diemOptions, dieuOptions, khoanOptions } from "@/utils/law";
 import TextEditor from "@/components/TextEditor";
-
+import { Modal } from "antd";
 const TableForm = (props: ITableFormProps) => {
   const {
     dataSearch,
@@ -46,7 +46,7 @@ const TableForm = (props: ITableFormProps) => {
   const [docTypeCode, setDocTypeCode] = React.useState<string>();
   const [sectorCode, setSectorCode] = React.useState<string>();
 
-    const handleSubmit = async (values: typeof valueSubmit) => {
+  const handleSubmit = async (values: typeof valueSubmit) => {
     try {
       const res = await createThamQuyen(values);
       if (res.status === 200) {
@@ -56,11 +56,11 @@ const TableForm = (props: ITableFormProps) => {
         setModal("");
         setRefresh((prev) => !prev);
       }
-    } catch (err: any) {}
+    } catch (err: any) { }
   };
   const handleUpdate = async (values: typeof valueSubmit) => {
     try {
-      const res = await updateThamQuyen(itemTarget.code, values);
+      const res = await updateThamQuyen(itemTarget.id, values);
       if (res.status === 200) {
         setModal("");
         notification.success({
@@ -68,19 +68,21 @@ const TableForm = (props: ITableFormProps) => {
         });
         setRefresh((prev) => !prev);
       }
-    } catch (err: any) {}
+    } catch (err: any) { }
   };
   const handleDelete = async (id: string) => {
-    try {
-      const res = await daleteThamQuyen(id);
-      if (res.status === 200) {
-        setModal("");
-        notification.success({
-          message: res.data.msg,
-        });
-        setRefresh((prev) => !prev);
-      }
-    } catch (err: any) {}
+    if (modal == "delete") {
+      try {
+        const res = await daleteThamQuyen(id);
+        if (res.status === 200) {
+          setModal("");
+          notification.success({
+            message: res.data.msg,
+          });
+          setRefresh((prev) => !prev);
+        }
+      } catch (err: any) { }
+    }
   };
 
   const handleDetail = async (code: string) => {
@@ -88,11 +90,11 @@ const TableForm = (props: ITableFormProps) => {
       try {
         const res = await detailThamQuyen(code);
         if (res.status === 200) {
-          formikRef?.current?.setValues(res.data.data);
+          formikRef?.current?.setValues(res.data);
           setDocTypeCode(res.data.data.docTypeCode);
           setSectorCode(res.data.data.sectorCode);
         }
-      } catch (err: any) {}
+      } catch (err: any) { }
     }
   };
 
@@ -114,37 +116,66 @@ const TableForm = (props: ITableFormProps) => {
       title: "STT",
       dataIndex: "index",
       key: "index",
-      width: 90,
+      width: 60 ,
       render: (_text, _record, index) =>
         (paramsPage.page - 1) * paramsPage.size + index + 1,
     },
     {
-      title: "Lĩnh vực",
-      dataIndex: "sectorName",
-      key: "name",
-      width: 110,
+      title: "Tiêu đề",
+      dataIndex: "title",
+      key: "title",
+      width: 250,
+      render: (text: string) => (
+        <div
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: 230,
+          }}
+          title={text}
+        >
+          {text}
+        </div>
+      ),
     },
     {
-      title: "Loại văn bản",
-      dataIndex: "docTypeName",
-      key: "docTypeName",
-      width: 130,
+      title: "Slug",
+      dataIndex: "slug",
+      key: "slug",
+      width: 200,
+      render: (text: string) => (
+        <div
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: 230,
+          }}
+          title={text}
+        >
+          {text}
+        </div>
+      ),
     },
     {
-      title: "Trích yếu",
-      dataIndex: "documentName",
-      key: "documentName",
-      width: 350,
+      title: "Lượt xem",
+      dataIndex: "views",
+      key: "views",
+      width: 100,
+      sorter: (a: any, b: any) => a.views - b.views,
     },
     {
-      title: "Cấp thẩm quyền",
-      dataIndex: "competentAuthority",
-      key: "competentAuthority",
-    },
-    {
-      title: "Mục",
-      dataIndex: "tag",
-      key: "tag",
+      title: "Nổi bật",
+      dataIndex: "isFeatured",
+      key: "isFeatured",
+      width: 100,
+      render: (featured: boolean) =>
+        featured ? (
+          <Tag color="gold">Nổi bật</Tag>
+        ) : (
+          <Tag color="default">Thường</Tag>
+        ),
     },
     {
       width: 110,
@@ -155,17 +186,19 @@ const TableForm = (props: ITableFormProps) => {
           <EyeOutlined
             onClick={() => {
               setModal("preview");
-              handleDetail(record?.code);
+              handleDetail(record?.slug);
             }}
           />
           <EditOutlined
             onClick={() => {
-              handleDetail(record?.code);
+              handleDetail(record?.slug);
+              setItemTarget(record);
               setModal("update");
             }}
           />
           <DeleteOutlined
             onClick={() => {
+              setItemTarget(record);
               setModal("delete");
             }}
           />
@@ -190,237 +223,208 @@ const TableForm = (props: ITableFormProps) => {
   }, [modal]);
 
   return (
-    <WrapperTable title="QUẢN LÝ BÀI VIẾT" toolbar={toolbar}>
-      <CustomTable
-        columns={columns}
-        dataSource={dataSearch.data}
-        paramsPage={paramsPage}
-        setParamPage={setParamsPage}
-        total={dataSearch.total}
-        setItemTarget={setItemTarget}
-      />
-      {modal && modal !== "delete" && modal !== "import" && (
-        <ModalSection
-          open={!!modal}
-          onClose={() => {
-            setModal("");
-          }}
-          title={title}
-          width={"80%"}
-        >
-          <Formik
-            initialValues={valueSubmit}
-            validationSchema={validationSchema}
-            onSubmit={(values) => {
-              if (modal === "create") {
-                handleSubmit(values);
-              } else {
-                handleUpdate(values);
-              }
+    <div className="table-bai-viet">
+      <WrapperTable title="QUẢN LÝ BÀI VIẾT" toolbar={toolbar}>
+        <CustomTable
+          columns={columns}
+          dataSource={dataSearch.data}
+          paramsPage={paramsPage}
+          setParamPage={setParamsPage}
+          total={dataSearch.total}
+          setItemTarget={setItemTarget}
+        />
+        {modal && modal !== "delete" && modal !== "import" && (
+          <ModalSection
+            open={!!modal}
+            onClose={() => {
+              setModal("");
             }}
-            innerRef={formikRef}
+            title={title}
+            width={"80%"}
           >
-            {({ handleSubmit, setFieldValue }) => (
-              <Form onSubmit={handleSubmit}>
-                <Row gutter={[8, 16]}>
-                  <Col span={8}>
-                    <Field
-                      component={Select}
-                      label="Loại văn bản"
-                      name="docTypeCode"
-                      placeholder="Nhập loại văn bản"
-                      options={typeDoc}
-                      isRequired
-                      showSearch
-                      disabled={modal === "preview"}
-                      onChange={(value: any) => {
-                        setFieldValue("docTypeCode", value);
-                        setFieldValue("sectorCode", "");
-                        setFieldValue("documentCode", "");
-                        setDocTypeCode(value);
-                      }}
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <Field
-                      component={Select}
-                      label="Lĩnh vực"
-                      name="sectorCode"
-                      placeholder="Chọn lĩnh vực"
-                      options={optionsSector}
-                      disabled={
-                        modal === "preview" ||
-                        !formikRef.current?.values?.docTypeCode
-                      }
-                      isRequired
-                      showSearch
-                      onChange={(value: any) => {
-                        setFieldValue("sectorCode", value);
-                        setFieldValue("documentCode", "");
-                        setSectorCode(value);
-                      }}
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <Field
-                      component={Select}
-                      label="Trích yếu"
-                      name="documentCode"
-                      placeholder="Nhập trích yếu"
-                      options={optionsDocument}
-                      isRequired
-                      disabled={
-                        modal === "preview" ||
-                        !formikRef.current?.values?.sectorCode
-                      }
-                    />
-                  </Col>
+            <Formik
+              initialValues={valueSubmit}
+              // validationSchema={validationSchema}
+              onSubmit={(values) => {
+                if (modal === "create") {
+                  handleSubmit(values);
+                } else {
+                  handleUpdate(values);
+                }
+              }}
+              innerRef={formikRef}
+            >
+              {({ handleSubmit, setFieldValue }) => (
+                <Form onSubmit={handleSubmit}>
+                  <Row gutter={[8, 16]}>
+                    <Col span={12} xs={24} md={12}>
+                      <Field
+                        component={Input}
+                        label="Tiêu đề bài viết"
+                        name="title"
+                        placeholder="Nhập tiêu đề"
+                        isRequired
+                        disabled={modal === "preview"}
+                      />
+                    </Col>
 
-                  <Col span={8}>
-                    <Field
-                      component={Select}
-                      label="Điều"
-                      name="article"
-                      placeholder="Chọn điều"
-                      options={dieuOptions}
-                      disabled={modal === "preview"}
-                      isRequired
-                      showSearch
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <Field
-                      component={Select}
-                      label="Khoản"
-                      name="clause"
-                      placeholder="Chọn khoản"
-                      options={khoanOptions}
-                      disabled={modal === "preview"}
-                      showSearch
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <Field
-                      component={Select}
-                      label="Điểm"
-                      name="point"
-                      placeholder="Chọn diểm"
-                      options={diemOptions}
-                      disabled={modal === "preview"}
-                      showSearch
-                    />
-                  </Col>
+                    <Col span={12} xs={24} md={12}>
+                      <Field
+                        component={Input}
+                        label="Ảnh (URL)"
+                        name="image"
+                        placeholder="https://example.com/iphone17.jpg"
+                        isRequired
+                        disabled={modal === "preview"}
+                      />
+                    </Col>
 
-                  <Col span={8}>
-                    <Field
-                      component={Input}
-                      label="Mã thẩm quyền"
-                      name="code"
-                      placeholder="Nhập mã thẩm quyền"
-                      isRequired
-                      disabled={modal === "preview"}
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <Field
-                      component={Select}
-                      label="Cấp thẩm quyền"
-                      name="competentAuthorityCode"
-                      placeholder="Chọn cấp thẩm quyền"
-                      options={issLevel}
-                      disabled={modal === "preview"}
-                      isRequired
-                      showSearch
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <Field
-                      component={Input}
-                      label="Ghi chú"
-                      name="note"
-                      placeholder="Nhập ghi chú"
-                      disabled={modal === "preview"}
-                    />
-                  </Col>
-                  <Col span={24}>
-                    <Field
-                      component={TextEditor}
-                      label="Nội dung"
-                      name="content"
-                      height="300px"
-                      isRequired
-                      onChange={(value: string) => {
-                        if (value === "<p><br></p>") {
-                          setFieldValue("content", "");
-                          return;
-                        }
-                        setFieldValue("content", value);
-                      }}
-                      disabled={modal === "preview"}
-                    />
-                  </Col>
-                </Row>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    marginTop: "1rem",
-                    gap: "8px",
-                  }}
-                >
-                  <ButtonCancel
-                    title="Đóng"
-                    onClick={() => {
-                      setModal?.("");
+                    <Col span={8} xs={24} md={8}>
+                      <Field
+                        component={Select}
+                        label="Danh mục"
+                        name="categoryId"
+                        placeholder="Chọn danh mục"
+                        options={[
+                          { label: "Thể thao", value: 1 },
+                          { label: "Công nghệ", value: 2 },
+                          { label: "Kinh doanh", value: 3 },
+                          { label: "Giải trí", value: 4 },
+                          { label: "Đời sống", value: 5 },
+                          { label: "Thế giới", value: 7 },
+                          { label: "Giáo dục", value: 8 },
+                          { label: "Du lịch", value: 9 },
+                          { label: "Pháp luật", value: 10 },
+                          { label: "Thời sự", value: 6 },
+                        ]}
+
+                        isRequired
+                        disabled={modal === "preview"}
+                      />
+                    </Col>
+
+                    <Col span={8} xs={24} md={8}>
+                      <Field
+                        component={Input}
+                        label="Lượt xem"
+                        name="views"
+                        placeholder="Nhập số lượt xem"
+                        type="number"
+                        isRequired
+                        disabled={modal === "preview"}
+                      />
+                    </Col>
+
+                    <Col span={8} xs={24} md={8}>
+                      <Field
+                        component={Select}
+                        label="Bài viết nỏi bật"
+                        name="isFeatured"
+                        placeholder="Chọn trạng thái"
+                        options={[
+                          { label: "Có", value: true },
+                          { label: "Không", value: false },
+                        ]}
+                        isRequired
+                        disabled={modal === "preview"}
+                      />
+                    </Col>
+
+                    <Col span={24}>
+                      <Field
+                        component={Select}
+                        label="Tags"
+                        name="tags"
+                        mode="multiple"
+                        placeholder="Chọn tags"
+                        options={[
+                          { label: "Tin nóng", value: "tin nóng" },
+                          { label: "Khuyến mãi", value: "khuyến mãi" },
+                          { label: "Công nghệ", value: "công nghệ" },
+                        ]}
+                        disabled={modal === "preview"}
+                      />
+                    </Col>
+
+                    <Col span={24}>
+                      <Field
+                        component={TextEditor}
+                        label="Nội dung bài viết"
+                        name="content"
+                        height="300px"
+                        isRequired
+                        onChange={(value: string) => {
+                          if (value === "<p><br></p>") {
+                            setFieldValue("content", "");
+                            return;
+                          }
+                          setFieldValue("content", value);
+                        }}
+                        disabled={modal === "preview"}
+                      />
+                    </Col>
+                  </Row>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      marginTop: "1rem",
+                      gap: "8px",
                     }}
-                  />
-                  {modal !== "preview" && (
-                    <ButtonCreate
-                      title="Lưu"
-                      htmlType={ButtonHTMLTypes.Submit}
+                  >
+                    <ButtonCancel
+                      title="Đóng"
+                      onClick={() => {
+                        setModal("");
+                      }}
                     />
-                  )}
-                </div>
-              </Form>
-            )}
-          </Formik>
-        </ModalSection>
-      )}
-      {modal === "delete" && (
-        <ModalSection
-          open={!!modal}
-          onClose={() => {
-            setModal("");
-          }}
-          title="XOÁ THẨM QUYỀN"
-        >
-          Bạn có chắc chắn xoá
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "1rem",
-              gap: "8px",
+                    {modal !== "preview" && (
+                      <ButtonCreate title="Lưu" htmlType={ButtonHTMLTypes.Submit} />
+                    )}
+                  </div>
+                </Form>
+
+              )}
+            </Formik>
+          </ModalSection>
+        )}
+        {modal === "delete" && (
+          <ModalSection
+            open={!!modal}
+            onClose={() => {
+              setModal("");
             }}
+            title="XOÁ THẨM QUYỀN"
           >
-            <ButtonCancel
-              title="Đóng"
-              onClick={() => {
-                setModal?.("");
+            Bạn có chắc chắn xoá
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "1rem",
+                gap: "8px",
               }}
-            />
-            <ButtonCreate
-              title="Đồng ý"
-              htmlType={ButtonHTMLTypes.Submit}
-              onClick={() => {
-                handleDelete(itemTarget?.code);
-              }}
-            />
-          </div>
-        </ModalSection>
-      )}
-      
-    </WrapperTable>
+            >
+              <ButtonCancel
+                title="Đóng"
+                onClick={() => {
+                  setModal?.("");
+                }}
+              />
+              <ButtonCreate
+                title="Đồng ý"
+                htmlType={ButtonHTMLTypes.Submit}
+                onClick={() => {
+                  handleDelete(itemTarget?.id);
+                }}
+              />
+            </div>
+          </ModalSection>
+        )}
+
+      </WrapperTable>
+    </div>
   );
 };
 

@@ -3,16 +3,20 @@
 .ant-layout-sider-children {
   background-color: $textWhite;
 }
+
 .ant-layout-sider-trigger {
   background-color: $textWhite !important;
+
   .anticon {
     color: black;
   }
 }
+
 .ant-modal-content {
   padding: 0 !important;
   border-radius: 0px;
 }
+
 .ant-modal-close {
   top: 0 !important;
   right: 0 !important;
@@ -45,9 +49,11 @@
   background-color: $redTeca !important;
   border-color: $redTeca !important;
 }
+
 .custom-tree {
   pointer-events: none !important;
 }
+
 .ant-checkbox-checked .ant-checkbox-inner {
   background-color: red !important;
   border-color: red !important;
