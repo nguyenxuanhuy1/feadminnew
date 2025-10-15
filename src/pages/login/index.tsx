@@ -48,7 +48,7 @@ const Login = () => {
       <div className="banner-stack">
         <img src="/2.png" alt="middle" className="banner-full middle-img" />
         <div className="banner-full bottom-img">
-          <div className="bottom-content">
+          <div className="top-content">
             <form className="login-form" onSubmit={handleSubmit}>
               <div className="form-row">
                 <label htmlFor="email" className="form-label">Email</label>
@@ -76,7 +76,8 @@ const Login = () => {
                 />
               </div>
             </form>
-
+          </div>
+          <div className="bottom-content">
             <button className="login-button" onClick={handleSubmit}>
               <span className="login-text">Đăng nhập</span>
               <img src="/logo.png" alt="logo" className="login-logo" />

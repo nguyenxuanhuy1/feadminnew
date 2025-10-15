@@ -17,6 +17,52 @@
     .banner-full {
       display: block;
       object-fit: contain;
+      flex-direction: column;
+      margin-top: -100px;
+    }
+
+    .top-content {
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      padding: 40px 50px;
+      width: 360px;
+
+      @media (max-width: 768px) {
+        width: 90%;
+        padding: 25px 20px;
+      }
+
+      .login-form {
+        width: 100%;
+
+        .form-row {
+          display: flex;
+          flex-direction: column;
+          margin-bottom: 20px;
+
+          .form-label {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 6px;
+          }
+
+          .form-input {
+            border: 1px solid #ccd5e0;
+            border-radius: 5px;
+            padding: 10px 14px;
+            font-size: 15px;
+            transition: all 0.25s ease;
+
+            &:focus {
+              outline: none;
+              border-color: #0066ff;
+              box-shadow: 0 0 4px rgba(0, 102, 255, 0.3);
+            }
+          }
+        }
+      }
     }
 
     img.middle-img {
