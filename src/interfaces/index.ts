@@ -9,7 +9,6 @@ export interface ResponseGenerator<T = any> {
 
 export enum ButtonType {
   Primary = "primary",
-  // Ghost = "ghost",
   Dashed = "dashed",
   Link = "link",
   Text = "text",

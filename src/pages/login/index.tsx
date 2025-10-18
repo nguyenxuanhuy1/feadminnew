@@ -1,44 +1,38 @@
-import LinkApi from "@/Hook/LinkApi";
 import React, { useState } from "react";
+import { notification } from "antd";
+import { authLogin } from "@/api/auth";
 
-const Login = () => {
+const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
-      const res = await fetch(LinkApi.Login, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const res = await authLogin({ email, password });
+
+      if (res.status === 200 && res.data) {
+        const data = res.data;
+        if (data.accessToken) localStorage.setItem("accessToken", data.accessToken);
+        if (data.refreshToken) localStorage.setItem("refreshToken", data.refreshToken);
+        if (data.email) localStorage.setItem("email", data.email);
+        if (data.role) localStorage.setItem("role", data.role);
+
+        notification.success({
+          message: "Đăng nhập thành công",
+        });
+        
+        window.location.href = "/";
+      } else {
+        notification.error({
+          message: res.data?.message || "Đăng nhập thất bại",
+        });
+      }
+    } catch (error: any) {
+      notification.error({
+        message: "Đăng nhập thất bại",
+        description: error.response?.data?.message || error.message,
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.message || "Đăng nhập thất bại");
-      }
-      if (data.accessToken) {
-        localStorage.setItem("accessToken", data.accessToken);
-      }
-      if (data.refreshToken) {
-        localStorage.setItem("refreshToken", data.refreshToken);
-      }
-      if (data.email) {
-        localStorage.setItem("email", data.email);
-      }
-      if (data.role) {
-        localStorage.setItem("role", data.role);
-      }
-
-      console.log("Đăng nhập thành công:", data);
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Login error:", error);
-      alert((error as Error).message || "Đăng nhập thất bại");
     }
   };
 
@@ -51,37 +45,43 @@ const Login = () => {
           <div className="top-content">
             <form className="login-form" onSubmit={handleSubmit}>
               <div className="form-row">
-                <label htmlFor="email" className="form-label">Email</label>
+                <label htmlFor="email" className="form-label">
+                  Email
+                </label>
                 <input
                   id="email"
-                  type="email"
+                  type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="form-input"
-                  placeholder="nhập email"
+                  placeholder="Nhập email"
                   required
                 />
               </div>
 
               <div className="form-row">
-                <label htmlFor="password" className="form-label">Mật khẩu</label>
+                <label htmlFor="password" className="form-label">
+                  Mật khẩu
+                </label>
                 <input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="form-input"
-                  placeholder="nhập mật khẩu"
+                  placeholder="Nhập mật khẩu"
                   required
                 />
               </div>
+
+              <button type="submit" className="login-button">
+                <span className="login-text">Đăng nhập</span>
+                <img src="/logo.png" alt="logo" className="login-logo" />
+              </button>
+              <div className="dangKiLink" style={{ display: 'flex', justifyContent: 'center' }}>
+                <p style={{color:'white'}}>Bạn chưa có tài khoản ? <a style={{color:'white', textDecoration:'underline'}} href="/register">Đăng kí</a></p>
+              </div>
             </form>
-          </div>
-          <div className="bottom-content">
-            <button className="login-button" onClick={handleSubmit}>
-              <span className="login-text">Đăng nhập</span>
-              <img src="/logo.png" alt="logo" className="login-logo" />
-            </button>
           </div>
         </div>
       </div>
@@ -90,4 +90,3 @@ const Login = () => {
 };
 
 export default Login;
-// ...existing code...

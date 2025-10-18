@@ -12,7 +12,7 @@ import {
 import { Col, notification, Row, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Field, Form, Formik } from "formik";
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { valueSubmit } from "../helper/initialValues";
 import Select from "@/components/CustomSelect";
 import Input from "@/components/CustomField/InputField";
@@ -25,9 +25,8 @@ import {
 import { validationSchema } from "../helper/validation";
 import { ButtonHTMLTypes } from "@/interfaces";
 import { ITableFormProps } from "../helper/interface";
-import { diemOptions, dieuOptions, khoanOptions } from "@/utils/law";
 import TextEditor from "@/components/TextEditor";
-import { Modal } from "antd";
+import { getMenu } from "../../../api/auth"
 const TableForm = (props: ITableFormProps) => {
   const {
     dataSearch,
@@ -41,35 +40,62 @@ const TableForm = (props: ITableFormProps) => {
   const [itemTarget, setItemTarget] = React.useState<any | null>(null);
   const formikRef = useRef<any>(null);
 
-  const [optionsSector, setOptionsSector] = React.useState([]);
-  const [optionsDocument, setOptionsDocument] = React.useState([]);
+  const [optionsSelect, setOptionsSelect] = React.useState([]);
   const [docTypeCode, setDocTypeCode] = React.useState<string>();
   const [sectorCode, setSectorCode] = React.useState<string>();
 
-  const handleSubmit = async (values: typeof valueSubmit) => {
+  const handleGet = async () => {
     try {
-      const res = await createThamQuyen(values);
+      const res = await getMenu();
+      const list = res.data.map((item: any) => ({
+        label: item.name,
+        value: item.id,
+      }));
+      setOptionsSelect(list)
+    } catch (err: any) { }
+  };
+
+  useEffect(() => {
+    handleGet();
+  }, []);
+
+  const handleSubmit = async (values: typeof valueSubmit) => {
+    // debugger
+    try {
+      const payload = {
+        ...values,
+        isFeatured: values.categoryId === 1 ? true : values.isFeatured,
+      };
+
+      const res = await createThamQuyen(payload);
+
       if (res.status === 200) {
         notification.success({
-          message: res.data.msg,
+          message: res.data || "Tạo bài viết thành công",
         });
         setModal("");
         setRefresh((prev) => !prev);
       }
-    } catch (err: any) { }
+    } catch (err: any) {
+      notification.error({
+        message: "Có lỗi xảy ra khi tạo bài viết",
+      });
+    }
   };
+
   const handleUpdate = async (values: typeof valueSubmit) => {
     try {
       const res = await updateThamQuyen(itemTarget.id, values);
       if (res.status === 200) {
         setModal("");
         notification.success({
-          message: res.data.msg,
+          message: res.data,
         });
         setRefresh((prev) => !prev);
       }
     } catch (err: any) { }
   };
+
   const handleDelete = async (id: string) => {
     if (modal == "delete") {
       try {
@@ -77,7 +103,7 @@ const TableForm = (props: ITableFormProps) => {
         if (res.status === 200) {
           setModal("");
           notification.success({
-            message: res.data.msg,
+            message: res.data,
           });
           setRefresh((prev) => !prev);
         }
@@ -116,7 +142,7 @@ const TableForm = (props: ITableFormProps) => {
       title: "STT",
       dataIndex: "index",
       key: "index",
-      width: 60 ,
+      width: 60,
       render: (_text, _record, index) =>
         (paramsPage.page - 1) * paramsPage.size + index + 1,
     },
@@ -244,7 +270,6 @@ const TableForm = (props: ITableFormProps) => {
           >
             <Formik
               initialValues={valueSubmit}
-              // validationSchema={validationSchema}
               onSubmit={(values) => {
                 if (modal === "create") {
                   handleSubmit(values);
@@ -265,6 +290,8 @@ const TableForm = (props: ITableFormProps) => {
                         placeholder="Nhập tiêu đề"
                         isRequired
                         disabled={modal === "preview"}
+                        maxLength={200}
+                        showCount
                       />
                     </Col>
 
@@ -273,9 +300,10 @@ const TableForm = (props: ITableFormProps) => {
                         component={Input}
                         label="Ảnh (URL)"
                         name="image"
-                        placeholder="https://example.com/iphone17.jpg"
                         isRequired
                         disabled={modal === "preview"}
+                        maxLength={500}
+                        showCount
                       />
                     </Col>
 
@@ -285,19 +313,7 @@ const TableForm = (props: ITableFormProps) => {
                         label="Danh mục"
                         name="categoryId"
                         placeholder="Chọn danh mục"
-                        options={[
-                          { label: "Thể thao", value: 1 },
-                          { label: "Công nghệ", value: 2 },
-                          { label: "Kinh doanh", value: 3 },
-                          { label: "Giải trí", value: 4 },
-                          { label: "Đời sống", value: 5 },
-                          { label: "Thế giới", value: 7 },
-                          { label: "Giáo dục", value: 8 },
-                          { label: "Du lịch", value: 9 },
-                          { label: "Pháp luật", value: 10 },
-                          { label: "Thời sự", value: 6 },
-                        ]}
-
+                        options={optionsSelect}
                         isRequired
                         disabled={modal === "preview"}
                       />
@@ -315,34 +331,51 @@ const TableForm = (props: ITableFormProps) => {
                       />
                     </Col>
 
-                    <Col span={8} xs={24} md={8}>
-                      <Field
-                        component={Select}
-                        label="Bài viết nỏi bật"
-                        name="isFeatured"
-                        placeholder="Chọn trạng thái"
-                        options={[
-                          { label: "Có", value: true },
-                          { label: "Không", value: false },
-                        ]}
-                        isRequired
-                        disabled={modal === "preview"}
-                      />
-                    </Col>
+                    {modal !== "create" && (
+                      <Col span={8} xs={24} md={8}>
+                        <Field
+                          component={Select}
+                          label="Bài viết nổi bật"
+                          name="isFeatured"
+                          placeholder="Chọn trạng thái"
+                          options={[
+                            { label: "Có", value: true },
+                            { label: "Không", value: false },
+                          ]}
+                          isRequired
+                        />
+                      </Col>
+                    )}
+
 
                     <Col span={24}>
                       <Field
                         component={Select}
                         label="Tags"
                         name="tags"
-                        mode="multiple"
-                        placeholder="Chọn tags"
+                        mode="tags"
+                        placeholder="Nhập hoặc chọn tags"
                         options={[
-                          { label: "Tin nóng", value: "tin nóng" },
-                          { label: "Khuyến mãi", value: "khuyến mãi" },
-                          { label: "Công nghệ", value: "công nghệ" },
+                          { label: "Tin nóng", value: "tin-nong" },
+                          { label: "Thời sự", value: "thoi-su" },
+                          { label: "Công nghệ", value: "cong-nghe" },
+                          { label: "Giải trí", value: "giai-tri" },
                         ]}
                         disabled={modal === "preview"}
+                      />
+                    </Col>
+
+                    <Col span={24}>
+                      <Field
+                        component={Input}
+                        label="Mô tả ngắn"
+                        name="shortContent"
+                        placeholder="Nhập mô tả"
+                        type="text"
+                        isRequired
+                        disabled={modal === "preview"}
+                        maxLength={200}
+                        showCount
                       />
                     </Col>
 

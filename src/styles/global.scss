@@ -58,3 +58,16 @@
   background-color: red !important;
   border-color: red !important;
 }
+
+
+input:disabled {
+  color: #000 !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #000;
+}
+
+.ant-select-disabled .ant-select-selector .ant-select-selection-item-content{
+  color: #000 !important;         
+  background-color: #f5f5f5 !important; 
+  cursor: not-allowed;
+}

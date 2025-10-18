@@ -61,3 +61,49 @@ export const searchFileThamQuyen = async (
   );
   return res;
 };
+
+
+// api video
+export const getAllVideos = async (page: number, size: number) => {
+  const res = await axiosInstance.get(
+    `/api/link-youtube/list?page=${page}&size=${size}`
+  );
+  return res;
+}
+
+export const createVideo = async (body: any) => {
+  const res = await axiosInstance.post(`/api/link-youtube/create`, body);
+  return res;
+};
+
+export const updateVideo = async (id: string, body: any) => {
+  const res = await axiosInstance.post(`/api/link-youtube/update/${id}`, body);
+  return res;
+};
+
+export const daleteVideo = async (id: string) => {
+  const res = await axiosInstance.post(`/api/link-youtube/delete/${id}`, id);
+  return res;
+};
+
+
+// api category
+export const getAllCategory = async () => {
+  const res = await axiosInstance.get(`/api/articles/category`);
+  return res;
+}
+
+export const createCategory = async (body: any) => {
+  const res = await axiosInstance.post(`/api/articles/category/create`, body);
+  return res;
+}
+
+export const updateCategory = async (id: number, body: any) => {
+  const res = await axiosInstance.post(`/api/articles/category/update/${id}`, body);
+  return res;
+}
+
+export const deleteCategory = async (id: number) => {
+  const res = await axiosInstance.post(`/api/articles/category/delete/${id}`);
+  return res;
+}

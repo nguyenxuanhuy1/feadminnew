@@ -11,7 +11,6 @@ import { isEmpty } from "@/utils/lodash";
 import Path from "@/router/path";
 import { CustomTypography } from "@/components/CustomTypography";
 import quochuy from "@/assets/quochuy.png";
-import MenuLeft from "@/components/menu";
 
 const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -60,7 +59,7 @@ const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
         width={270}
       >
         <div
-          className="h"
+          className="h" 
           onClick={() => {
             navigate(Path.Home);
           }}
