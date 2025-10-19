@@ -1,10 +1,5 @@
 export const valueSearch = {
-  sectorCode: null,
-  docTypeCode: null,
-  documentName: "",
-  competentAuthorityCode: null,
-  unitLevel: "",
-  content: "",
+  title: "",
 };
 export const valueSubmit = {
   title: "",

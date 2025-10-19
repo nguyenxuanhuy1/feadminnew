@@ -7,8 +7,8 @@ export const searchThamQuyen = async (
   page: number,
   size: number
 ) => {
-  const res = await axiosInstance.get(
-    `/api/articles/search?${page}&size=${size}`,
+  const res = await axiosInstance.post(
+    `/api/articles/search/admin?page=${page}&size=${size}`,
     body
   );
   return res;

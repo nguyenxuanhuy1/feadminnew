@@ -66,13 +66,13 @@ const BaiViet = () => {
 
   return (
     <WrapSection>
-      {/* <SearchForm
+      <SearchForm
         setSearchForm={setSearchForm}
         categoryCode={categoryCode}
         issLevel={issLevel}
         typeDoc={typeDoc}
         setParamsPage={setParamsPage}
-      /> */}
+      />
       <TableForm
         dataSearch={dataSearch}
         paramsPage={paramsPage}
