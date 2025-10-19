@@ -1,9 +1,7 @@
-import { authRefreshToken } from "@/api/auth";
-import { BASE_URL } from "@/router/path";
 import { message, notification } from "antd";
 import axios from "axios";
-
-// Create an Axios instance
+import { authRefreshToken } from "./auth";
+const BASE_URL = process.env.REACT_APP_DB_URL;
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
 });
@@ -21,14 +19,12 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Response Interceptor (Handle Errors)
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
   async (error) => {
     if (!error.response) {
-      // message.error("Network error. Please try again.");
       return Promise.reject(error);
     }
 
@@ -44,18 +40,24 @@ axiosInstance.interceptors.response.use(
       case 401:
         if (
           localStorage.getItem("refresh-token") &&
-          originalRequest.url !== "auth/refresh-token"
+          originalRequest.url !== "/api/user/refresh"
         ) {
-          const res = await authRefreshToken({
-            refresh_token: localStorage.getItem("refresh-token"),
-          });
-          localStorage.setItem("token", res.access_token);
-          return axiosInstance(originalRequest);
+          try {
+            const res = await authRefreshToken({
+              refresh_token: localStorage.getItem("refresh-token"),
+            });
+            localStorage.setItem("token", res.access_token);
+            return axiosInstance(originalRequest);
+          } catch (err) {
+            localStorage.clear();
+            window.location.href = "/";
+          }
+        } else {
+          localStorage.clear();
+          window.location.href = "/";
         }
-        localStorage.removeItem("token");
-        localStorage.removeItem("refresh-token");
-        window.location.href = "/";
         break;
+
       case 403:
         message.error("You don't have permission to access this resource.");
         break;
