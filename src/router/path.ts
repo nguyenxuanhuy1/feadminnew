@@ -7,5 +7,6 @@ const Path: Record<string, string> = {
   BaiViet: "/bai-viet",
   Video: "/video",
   Category: "/category",
+  User: "/user",
 };
 export default Path;

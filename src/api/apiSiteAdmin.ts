@@ -107,3 +107,28 @@ export const deleteCategory = async (id: number) => {
   const res = await axiosInstance.post(`/api/articles/category/delete/${id}`);
   return res;
 }
+
+// api user
+
+export const searchUser = async (
+  keyword: string,
+  page: number,
+  size: number
+) => {
+  const res = await axiosInstance.get(`/api/user/search`, {
+    params: {
+      keyword,
+      page,
+      size,
+    },
+  });
+
+  return res;
+};
+
+export const deleteUser = async (id: number) => {
+  const res = await axiosInstance.post(`/api/user/delete`, null, {
+    params: { id },
+  });
+  return res;
+};

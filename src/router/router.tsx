@@ -1,7 +1,7 @@
 import React, { lazy } from "react";
 import Path from "./path";
 import { IRoute } from "./interface";
-import { HomeOutlined, MenuOutlined, SafetyCertificateOutlined, VideoCameraOutlined } from "@ant-design/icons";
+import { HomeOutlined, MenuOutlined, SafetyCertificateOutlined, UserOutlined, VideoCameraOutlined } from "@ant-design/icons";
 
 const DefaultLayoutAdmin = lazy(() => import("@/defaultLayout/layoutAdmin"));
 const Home = lazy(() => import("@/pages/Home/idex"));
@@ -10,6 +10,7 @@ const login = lazy(() => import("@/pages/login/index"));
 const register = lazy(() => import("@/pages/Register/index"));
 const Video = lazy(() => import("@/pages/Video/index"));
 const Category = lazy(() => import("@/pages/Category/index"));
+const User = lazy(() => import("@/pages/User/index"));
 const routes: IRoute[] = [
   {
     name: "login",
@@ -65,6 +66,16 @@ const routes: IRoute[] = [
     component: Category,
     isPrivateRoute: true,
     icon: <MenuOutlined />,
+    routeChild: [],
+  },
+  {
+    name: "Quản lý người dùng",
+    key: "user",
+    path: Path.User,
+    layout: DefaultLayoutAdmin,
+    component: User,
+    isPrivateRoute: true,
+    icon: <UserOutlined />,
     routeChild: [],
   },
 ];

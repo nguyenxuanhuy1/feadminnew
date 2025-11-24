@@ -22,7 +22,6 @@ const TableVideo = (props: ITableFormProps) => {
   const [modal, setModal] = useState("");
   const [itemTarget, setItemTarget] = useState<any | null>(null);
   const formikRef = useRef<any>(null);
-  console.log(dataSearch.data);
 
   const handleSubmit = async (values: any) => {
     try {
