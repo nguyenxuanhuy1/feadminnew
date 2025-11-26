@@ -45,24 +45,34 @@ const UserTable: React.FC<UserTableProps> = ({
   };
 
   const columns = [
-    { title: "ID", dataIndex: "id", width: 80 },
+    {
+      title: "STT",
+      width: 70,
+      render: (_: any, __: User, index: number) =>
+        (paramsPage.page - 1) * paramsPage.size + index + 1,
+    },
     { title: "Họ tên", dataIndex: "fullName" },
     { title: "Email", dataIndex: "email" },
     { title: "Quyền", dataIndex: "role" },
     {
       title: "Hành động",
-      width: 100,
-      render: (_: any, record: User) => (
-        <Button
-          danger
-          icon={<DeleteOutlined />}
-          onClick={(e) => {
-            e.stopPropagation(); 
-            setItemTarget(record);
-            setModal(record.id.toString());
-          }}
-        />
-      ),
+      width: 150,
+      render: (_: any, record: User) => {
+        // Nếu là ADMIN thì không hiển thị nút xoá
+        if (record.role === "ADMIN") return null;
+
+        return (
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              setItemTarget(record);
+              setModal(record.id.toString());
+            }}
+          />
+        );
+      },
     },
   ];
 
@@ -81,7 +91,7 @@ const UserTable: React.FC<UserTableProps> = ({
       <ModalSection
         open={!!modal}
         onClose={() => setModal("")}
-        title="XOÁ THẨM QUYỀN"
+        title="XOÁ TÀI KHOẢN"
       >
         <div style={{ textAlign: "center", fontSize: 16 }}>
           Bạn có chắc chắn xoá?
