@@ -58,7 +58,6 @@ const UserTable: React.FC<UserTableProps> = ({
       title: "Hành động",
       width: 150,
       render: (_: any, record: User) => {
-        // Nếu là ADMIN thì không hiển thị nút xoá
         if (record.role === "ADMIN") return null;
 
         return (

@@ -3,7 +3,7 @@ import Path from "./path";
 
 const PrivateRoute = (props: { children: any }) => {
   const auth = localStorage.getItem("role");
-  if (auth === 'ADMIN') {
+  if (auth === 'ADMIN' || auth ==='POST') {
     return props.children;
   } else {
     return <Navigate to={"/login"} replace />;

@@ -1,5 +1,6 @@
 export const valueSearch = {
   title: "",
+  status: null
 };
 export const valueSubmit = {
   title: "",
@@ -9,6 +10,7 @@ export const valueSubmit = {
   isFeatured: false,
   tags: [],
   content: "",
+ 
 };
 
 export const valueSearchImport = {

@@ -20,6 +20,7 @@ import {
   createThamQuyen,
   daleteThamQuyen,
   detailThamQuyen,
+  statusAdmin,
   updateThamQuyen,
 } from "@/api/apiSiteAdmin";
 import { validationSchema } from "../helper/validation";
@@ -39,25 +40,38 @@ const TableForm = (props: ITableFormProps) => {
   const [modal, setModal] = React.useState("");
   const [itemTarget, setItemTarget] = React.useState<any | null>(null);
   const formikRef = useRef<any>(null);
-
+  const role = localStorage.getItem('role');
   const [optionsSelect, setOptionsSelect] = React.useState([]);
   const [docTypeCode, setDocTypeCode] = React.useState<string>();
   const [sectorCode, setSectorCode] = React.useState<string>();
 
-  const handleGet = async () => {
+  const handleApproveOrReject = async (
+    id: number,
+    status: "PUBLISHED" | "REVOKED"
+  ) => {
     try {
-      const res = await getMenu();
-      const list = res.data.map((item: any) => ({
-        label: item.name,
-        value: item.id,
-      }));
-      setOptionsSelect(list)
-    } catch (err: any) { }
+      const payload = {
+        status,
+      };
+
+      await statusAdmin(id, payload);
+
+      notification.success({
+        message:
+          status === "PUBLISHED"
+            ? "Duyệt bài viết thành công"
+            : "Từ chối bài viết thành công",
+      });
+
+      setRefresh((prev) => !prev);
+    } catch (err: any) {
+      notification.error({
+        message: err?.response?.data?.message || "Có lỗi xảy ra",
+      });
+    }
+
   };
 
-  useEffect(() => {
-    handleGet();
-  }, []);
 
   const handleSubmit = async (values: typeof valueSubmit) => {
     // debugger
@@ -82,6 +96,22 @@ const TableForm = (props: ITableFormProps) => {
       });
     }
   };
+
+  const handleGet = async () => {
+    try {
+      const res = await getMenu();
+      const list = res.data.map((item: any) => ({
+        label: item.name,
+        value: item.id,
+      }));
+      setOptionsSelect(list)
+    } catch (err: any) { }
+  };
+
+  useEffect(() => {
+    handleGet();
+  }, []);
+
 
   const handleUpdate = async (values: typeof valueSubmit) => {
     try {
@@ -204,33 +234,95 @@ const TableForm = (props: ITableFormProps) => {
         ),
     },
     {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 100,
+      render: (status: string) => {
+        const label =
+          status === "PENDING"
+            ? "⌛"
+            : status === "PUBLISHED"
+              ? "✔️"
+              : status === "REVOKED"
+                ? "❌"
+                : status;
+
+        return <span>{label}</span>;
+      },
+
+    },
+    {
       width: 110,
       title: "Thao tác",
       key: "action",
-      render: (_text, record) => (
-        <div style={{ display: "flex", gap: 8 }}>
-          <EyeOutlined
-            onClick={() => {
-              setModal("preview");
-              handleDetail(record?.slug);
-            }}
-          />
-          <EditOutlined
-            onClick={() => {
-              handleDetail(record?.slug);
-              setItemTarget(record);
-              setModal("update");
-            }}
-          />
-          <DeleteOutlined
-            onClick={() => {
-              setItemTarget(record);
-              setModal("delete");
-            }}
-          />
-        </div>
-      ),
-    },
+      render: (_text, record) => {
+        const isPublished = record?.status === "PUBLISHED";
+        const isAdmin = role === "ADMIN";
+
+        return (
+          <div style={{ display: "flex", gap: 8 }}>
+            {isAdmin && (
+              <Select
+                placeholder="Trạng thái"
+                value={record?.status}
+                options={[
+                  { label: "✔️", value: "PUBLISHED" },
+                  { label: "❌", value: "REVOKED" },
+                ]}
+                onChange={(value) => {
+                  handleApproveOrReject(record.id, value);
+                }}
+              />
+            )}
+            <EyeOutlined
+              onClick={() => {
+                setModal("preview");
+                handleDetail(record?.slug);
+              }}
+            />
+            {isAdmin && (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <EditOutlined
+                  onClick={() => {
+                    handleDetail(record?.slug);
+                    setItemTarget(record);
+                    setModal("update");
+                  }}
+                />
+
+                <DeleteOutlined
+                  onClick={() => {
+                    setItemTarget(record);
+                    setModal("delete");
+                  }}
+                />
+              </div>
+            )}
+            {!isAdmin && !isPublished && (
+              <>
+                <EditOutlined
+                  onClick={() => {
+                    handleDetail(record?.slug);
+                    setItemTarget(record);
+                    setModal("update");
+                  }}
+                />
+
+                {/* <DeleteOutlined
+                  onClick={() => {
+                    setItemTarget(record);
+                    setModal("delete");
+                  }}
+                /> */}
+                
+              </>
+            )}
+          </div>
+        );
+      },
+    }
+
   ];
 
   const title = useMemo(() => {

@@ -132,3 +132,9 @@ export const deleteUser = async (id: number) => {
   });
   return res;
 };
+
+
+export const statusAdmin = async (id: number, body: any) => {
+  const res = await axiosInstance.post(`/api/articles/change-status/${id}`, body);
+  return res;
+}

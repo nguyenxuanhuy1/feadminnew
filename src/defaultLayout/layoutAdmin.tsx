@@ -18,20 +18,34 @@ const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
   const profile = localStorage.getItem("profile");
   const fullName = profile ? JSON.parse(profile).fullName : "";
 
-  const renderMenu = (data: IRoute[]) => {
-    const dataLayout = data.filter((item) => item.isPrivateRoute);
-    return dataLayout.map((route) => {
-      return !isEmpty(route.routeChild) ? (
-        <SubMenu key={route.path} title={route.name} icon={route.icon}>
-          {renderMenu(route.routeChild)}
-        </SubMenu>
-      ) : (
-        <Menu.Item key={route.path} icon={route.icon}>
-          <Link to={route.path}>{route.name}</Link>
-        </Menu.Item>
-      );
-    });
+  const role = localStorage.getItem("role");
+
+  const renderMenu = (data: IRoute[]): React.ReactNode[] => {
+    return data
+      .filter((item) => {
+        if (!item.isPrivateRoute) return false;
+        if (role === "POST" && (item.key === "user" || item.key === "video" || item.key === "category")) return false;
+        return true;
+      })
+      .map((route) => {
+        if (!isEmpty(route.routeChild)) {
+          const children = renderMenu(route.routeChild);
+          if (children.length === 0) return null;
+          return (
+            <SubMenu key={route.key} title={route.name} icon={route.icon}>
+              {children}
+            </SubMenu>
+          );
+        }
+        return (
+          <Menu.Item key={route.key} icon={route.icon}>
+            <Link to={route.path}>{route.name}</Link>
+          </Menu.Item>
+        );
+      })
+      .filter(Boolean);
   };
+
 
   const items: MenuProps["items"] = [
     {
@@ -59,14 +73,14 @@ const DefaultLayout = ({ children }: { children: React.ReactNode }) => {
         width={270}
       >
         <div
-          className="h" 
+          className="h"
           onClick={() => {
             navigate(Path.Home);
           }}
         >
-          <Image width={50} height={50} preview={false} src={quochuy} />
+          <Image width={100} preview={false} src={quochuy} />
         </div>
-         <Menu theme="light" mode="inline" className="bg-red">
+        <Menu theme="light" mode="inline" className="bg-red">
           {renderMenu(routes)}
         </Menu>
 
