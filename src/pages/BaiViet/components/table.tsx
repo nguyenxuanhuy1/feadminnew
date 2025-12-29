@@ -3,13 +3,14 @@ import ModalSection from "@/components/CustomModal";
 import CustomTable from "@/components/CustomTable";
 import WrapperTable from "@/components/WrapSection/wrapTable";
 import {
+  ArrowUpOutlined,
   DeleteOutlined,
   DeliveredProcedureOutlined,
   EditOutlined,
   EyeOutlined,
   FileExcelOutlined,
 } from "@ant-design/icons";
-import { Col, notification, Row, Tag } from "antd";
+import { Col, notification, Row, Tag, Tooltip } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Field, Form, Formik } from "formik";
 import React, { useEffect, useMemo, useRef } from "react";
@@ -27,7 +28,7 @@ import { validationSchema } from "../helper/validation";
 import { ButtonHTMLTypes } from "@/interfaces";
 import { ITableFormProps } from "../helper/interface";
 import TextEditor from "@/components/TextEditor";
-import { getMenu } from "../../../api/auth"
+import { getMenu } from "../../../api/auth";
 const TableForm = (props: ITableFormProps) => {
   const {
     dataSearch,
@@ -40,28 +41,27 @@ const TableForm = (props: ITableFormProps) => {
   const [modal, setModal] = React.useState("");
   const [itemTarget, setItemTarget] = React.useState<any | null>(null);
   const formikRef = useRef<any>(null);
-  const role = localStorage.getItem('role');
+  const role = localStorage.getItem("role");
   const [optionsSelect, setOptionsSelect] = React.useState([]);
   const [docTypeCode, setDocTypeCode] = React.useState<string>();
   const [sectorCode, setSectorCode] = React.useState<string>();
 
   const handleApproveOrReject = async (
     id: number,
-    status: "PUBLISHED" | "REVOKED"
+    status: "PUBLISHED" | "REVOKED" | "PENDING"
   ) => {
     try {
       const payload = {
         status,
       };
 
-      await statusAdmin(id, payload);
+      const rest = await statusAdmin(id, payload);
 
-      notification.success({
-        message:
-          status === "PUBLISHED"
-            ? "Duyệt bài viết thành công"
-            : "Từ chối bài viết thành công",
-      });
+      if (rest.status === 200) {
+        notification.success({
+          message: rest.data,
+        });
+      }
 
       setRefresh((prev) => !prev);
     } catch (err: any) {
@@ -69,9 +69,7 @@ const TableForm = (props: ITableFormProps) => {
         message: err?.response?.data?.message || "Có lỗi xảy ra",
       });
     }
-
   };
-
 
   const handleSubmit = async (values: typeof valueSubmit) => {
     // debugger
@@ -104,14 +102,13 @@ const TableForm = (props: ITableFormProps) => {
         label: item.name,
         value: item.id,
       }));
-      setOptionsSelect(list)
-    } catch (err: any) { }
+      setOptionsSelect(list);
+    } catch (err: any) {}
   };
 
   useEffect(() => {
     handleGet();
   }, []);
-
 
   const handleUpdate = async (values: typeof valueSubmit) => {
     try {
@@ -123,7 +120,7 @@ const TableForm = (props: ITableFormProps) => {
         });
         setRefresh((prev) => !prev);
       }
-    } catch (err: any) { }
+    } catch (err: any) {}
   };
 
   const handleDelete = async (id: string) => {
@@ -137,7 +134,7 @@ const TableForm = (props: ITableFormProps) => {
           });
           setRefresh((prev) => !prev);
         }
-      } catch (err: any) { }
+      } catch (err: any) {}
     }
   };
 
@@ -150,7 +147,7 @@ const TableForm = (props: ITableFormProps) => {
           setDocTypeCode(res.data.data.docTypeCode);
           setSectorCode(res.data.data.sectorCode);
         }
-      } catch (err: any) { }
+      } catch (err: any) {}
     }
   };
 
@@ -180,14 +177,14 @@ const TableForm = (props: ITableFormProps) => {
       title: "Tiêu đề",
       dataIndex: "title",
       key: "title",
-      width: 250,
+      width: 300,
       render: (text: string) => (
         <div
           style={{
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            maxWidth: 230,
+            maxWidth: 300,
           }}
           title={text}
         >
@@ -195,25 +192,7 @@ const TableForm = (props: ITableFormProps) => {
         </div>
       ),
     },
-    {
-      title: "Slug",
-      dataIndex: "slug",
-      key: "slug",
-      width: 200,
-      render: (text: string) => (
-        <div
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: 230,
-          }}
-          title={text}
-        >
-          {text}
-        </div>
-      ),
-    },
+
     {
       title: "Lượt xem",
       dataIndex: "views",
@@ -237,69 +216,85 @@ const TableForm = (props: ITableFormProps) => {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      width: 100,
+      width: 140,
       render: (status: string) => {
         const label =
           status === "PENDING"
-            ? "⌛"
+            ? "Chờ phê duyệt"
             : status === "PUBLISHED"
-              ? "✔️"
-              : status === "REVOKED"
-                ? "❌"
-                : status;
+            ? "Đã phê duyệt"
+            : status === "REVOKED"
+            ? "Từ chối phê duyệt"
+            : status;
 
         return <span>{label}</span>;
       },
-
     },
     {
-      width: 110,
+      width: 160,
+      align: "center",
       title: "Thao tác",
       key: "action",
       render: (_text, record) => {
-        const isPublished = record?.status === "PUBLISHED";
         const isAdmin = role === "ADMIN";
-
+        const isPost = role === "POST";
         return (
           <div style={{ display: "flex", gap: 8 }}>
             {isAdmin && (
-              <Select
-                placeholder="Trạng thái"
-                value={record?.status}
-                options={[
-                  { label: "✔️", value: "PUBLISHED" },
-                  { label: "❌", value: "REVOKED" },
-                ]}
-                onChange={(value) => {
-                  handleApproveOrReject(record.id, value);
-                }}
-              />
-            )}
-            <EyeOutlined
-              onClick={() => {
-                setModal("preview");
-                handleDetail(record?.slug);
-              }}
-            />
-            {isAdmin && (
-              <div style={{ display: 'flex', gap: 8 }}>
-                <EditOutlined
-                  onClick={() => {
-                    handleDetail(record?.slug);
-                    setItemTarget(record);
-                    setModal("update");
-                  }}
-                />
-
-                <DeleteOutlined
-                  onClick={() => {
-                    setItemTarget(record);
-                    setModal("delete");
+              <div style={{ width: 140 }}>
+                <Select
+                  placeholder="Trạng thái"
+                  value={record?.status}
+                  options={[
+                    { label: "Chờ phê duyệt", value: "PENDING" },
+                    { label: "Đã phê duyệt", value: "PUBLISHED" },
+                    { label: "Từ chối", value: "REVOKED" },
+                  ]}
+                  onChange={(value) => {
+                    handleApproveOrReject(record.id, value);
                   }}
                 />
               </div>
             )}
-            {!isAdmin && !isPublished && (
+
+            {isPost && record.status === "REVOKED" && (
+              <Tooltip title="Chuyển phê duyệt">
+                <ArrowUpOutlined
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleApproveOrReject(record.id, "PENDING")}
+                />
+              </Tooltip>
+            )}
+            <Tooltip title="Xem chi tiết">
+              <EyeOutlined
+                onClick={() => {
+                  setModal("preview");
+                  handleDetail(record?.slug);
+                }}
+              />
+            </Tooltip>
+            {isAdmin && (
+              <div style={{ display: "flex", gap: 8 }}>
+                <Tooltip title="Chỉnh sửa">
+                  <EditOutlined
+                    onClick={() => {
+                      handleDetail(record?.slug);
+                      setItemTarget(record);
+                      setModal("update");
+                    }}
+                  />
+                </Tooltip>
+                <Tooltip title="Xoá">
+                  <DeleteOutlined
+                    onClick={() => {
+                      setItemTarget(record);
+                      setModal("delete");
+                    }}
+                  />
+                </Tooltip>
+              </div>
+            )}
+            {!isAdmin && record?.status === "REVOKED" && (
               <>
                 <EditOutlined
                   onClick={() => {
@@ -308,21 +303,12 @@ const TableForm = (props: ITableFormProps) => {
                     setModal("update");
                   }}
                 />
-
-                {/* <DeleteOutlined
-                  onClick={() => {
-                    setItemTarget(record);
-                    setModal("delete");
-                  }}
-                /> */}
-                
               </>
             )}
           </div>
         );
       },
-    }
-
+    },
   ];
 
   const title = useMemo(() => {
@@ -439,7 +425,6 @@ const TableForm = (props: ITableFormProps) => {
                       </Col>
                     )}
 
-
                     <Col span={24}>
                       <Field
                         component={Select}
@@ -505,11 +490,13 @@ const TableForm = (props: ITableFormProps) => {
                       }}
                     />
                     {modal !== "preview" && (
-                      <ButtonCreate title="Lưu" htmlType={ButtonHTMLTypes.Submit} />
+                      <ButtonCreate
+                        title="Lưu"
+                        htmlType={ButtonHTMLTypes.Submit}
+                      />
                     )}
                   </div>
                 </Form>
-
               )}
             </Formik>
           </ModalSection>
@@ -547,7 +534,6 @@ const TableForm = (props: ITableFormProps) => {
             </div>
           </ModalSection>
         )}
-
       </WrapperTable>
     </div>
   );
